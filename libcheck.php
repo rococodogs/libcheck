@@ -2,8 +2,13 @@
 class Libcheck {
     // checks to see if the library owns an item using WorldCat searching
 
-    public $libSymbols = array("EVI");
-    public $wskey;
+    public $libSymbols;
+    private $wskey;
+
+    public function __construct($libSymbols, $wskey) {
+        $this->libSymbols = $libSymbols;
+        $this->wskey = $wskey;
+    }
 
     /**
      *  search will take an isbn and use WorldCat's Library Catalog URL search service
@@ -18,13 +23,6 @@ class Libcheck {
 
     public function search($isbn, $callback = "") {
         
-        try {
-            $this->wskeyCheck($this->wskey);    
-        } catch (Exception $e) {
-            echo $e->getMessage();
-        }
-
-
         $libSymbolString = implode(",", $this->libSymbols);
         $isbn = str_replace("-", "", $isbn);
         
@@ -38,14 +36,14 @@ class Libcheck {
                 return $callback ? $callback(null, $url) : $url;
 
             } elseif ($xml->diagnostic) {
-                return $callback ? $callback($xml->diagnostic[0]->message) : false;
+                return $callback ? $callback($xml->diagnostic[0]->message, null) : false;
 
             } else {
-                return $callback("Uh-oh! Something went wrong!");
+                return $callback("Uh-oh! Something went wrong!", null);
             }
 
         } catch (Exception $e) {
-            return $callback ? $callback($e->getMessage()) : false;
+            return $callback ? $callback($e->getMessage(), null) : false;
         }
     }
 
@@ -58,12 +56,5 @@ class Libcheck {
             return $xml;
         }
     }
-
-    private function wskeyCheck($wskey = null) {
-        if (!$wskey) {
-            throw new Exception("No WorldShare key provided!");
-        }
-    }
-
 }
 ?>
