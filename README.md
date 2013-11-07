@@ -1,5 +1,5 @@
 # Libcheck
-WorldCat Search [Local Catalog URL api](http://oclc.org/developer/documentation/worldcat-search-api/library-catalog-url) gadgetry
+WorldCat Search [Local Catalog URL api](http://oclc.org/developer/documentation/worldcat-search-api/library-catalog-url) gadgetry (in PHP)
 
 
 ## the problem
@@ -32,6 +32,5 @@ $czech->search("1592408508", function($err, $url) {
 ## to do
 * add regex to sort out ISBNs from OCLC #s from ISSNs
 * multi-library support (half-way there w/ imploding `$libSymbols` array)
-* multi-item support
 * maybe just bite the bullet and do a full-flegged WorldCat Search class
 * snazzier name (of the __utmost__ importance)
