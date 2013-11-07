@@ -26,6 +26,18 @@ $czech->search("1592408508", function($err, $url) {
     } else {
     	echo $url;
     }
+
+/**
+ *  search example w/o callback
+ */
+
+$response = $czech->search("1592408508");
+
+if ($czech->search("1592408508")) {
+    header('Location: {$response}');
+    exit;
+} else {
+    echo "The library doesn't own that item!";
 });
 ```
 

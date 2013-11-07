@@ -39,7 +39,7 @@ class Libcheck {
                 return $callback ? $callback($xml->diagnostic[0]->message, null) : false;
 
             } else {
-                return $callback("Uh-oh! Something went wrong!", null);
+                return $callback ? $callback("Uh-oh! Something went wrong!", null) : false;
             }
 
         } catch (Exception $e) {
