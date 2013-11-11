@@ -33,7 +33,7 @@ $czech->search("1592408508", function($err, $url) {
 
 $response = $czech->search("1592408508");
 
-if ($czech->search("1592408508")) {
+if ($response) {
     header('Location: {$response}');
     exit;
 } else {
