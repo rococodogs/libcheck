@@ -10,39 +10,21 @@ set your OCLC library symbol(s) as an array, and supply your WorldCat Search api
 
 ```php
 $libSymbols = array("EVI");
-$wskey = "ABCDEFG1234567"; // NOT the WorldCat Basic api key
+$wskey = "1234567890";
 
-$czech = new Libcheck($libSymbols, $wskey);
+$libcheck = new Libcheck($libSymbols, $wskey);
+$results = $libcheck->search("9780316074230");
 
-/**
- *  search takes in an ISBN number and an optional callback function
- *  	that uses the node.js style of inputs: error first, then payload
- */
-
-$czech->search("1592408508", function($err, $url) {
-	if ($err) {
-    	echo $err;
-        return false;
-    } else {
-    	echo $url;
-    }
-
-/**
- *  search example w/o callback
- */
-
-$response = $czech->search("1592408508");
-
-if ($response) {
-    header('Location: {$response}');
-    exit;
+if (!$results) {
+    echo $libcheck->getMessage();
 } else {
-    echo "The library doesn't own that item!";
-});
+    foreach($results as $result) {
+        echo "<a href=\"{$result['URL']\">{$result['Institution Name']} ({$result['Symbol']})</a><br />";
+    }
+}
 ```
 
 ## to do
-* add regex to sort out ISBNs from OCLC #s from ISSNs
-* multi-library support (half-way there w/ imploding `$libSymbols` array)
-* maybe just bite the bullet and do a full-flegged WorldCat Search class
-* snazzier name (of the __utmost__ importance)
+* sort out ISBNs from OCLC #s from ISSNs
+* ~~multi-library support (half-way there w/ imploding `$libSymbols` array)~~
+* take in strings as libSymbols as well
