@@ -5,46 +5,77 @@ class Libcheck {
     public $libSymbols;
     private $wskey;
 
+    public $message = "";
+
     public function __construct($libSymbols, $wskey) {
         $this->libSymbols = $libSymbols;
         $this->wskey = $wskey;
     }
-
+        
+    
     /**
-     *  search will take an isbn and use WorldCat's Library Catalog URL search service
-     *      to check to see if an item is available in the library and will return the
-     *      catalog url if so. also offers the option of using a callback function with
-     *      the url or error message provided.
+     *  search:
+     *  -------
+     *  @param string: isbn to search with
+     *  @return array
+     *      'Institution Name' => Name of the institution
+     *      'Symbol' => OCLC symbol for institution
+     *      'URL' => WorldCat link to institution's catalog entry
      *  
-     *  ~ NOTE ~ 
-     *      uses the node.js setup for callbacks, where the error is the first input val
-     *      and the payload is the second. ~ function($error, $statusGoodies) ~
      */
 
-    public function search($isbn, $callback = "") {
-        
+
+    public function search($isbn) {
+
         $libSymbolString = implode(",", $this->libSymbols);
         $isbn = str_replace("-", "", $isbn);
         
-        $url = "http://www.worldcat.org/webservices/catalog/content/libraries/isbn/{$isbn}?";
+        $url  = "http://www.worldcat.org/webservices/catalog/content/libraries/isbn/{$isbn}?";
         $url .= "oclcsymbol={$libSymbolString}&wskey={$this->wskey}";
+
+        $results = array();
 
         try {
             $xml = new SimpleXMLElement($this->pullXml($url));
+            
+            // 'holding' being populated means we have a url available
             if ($xml->holding) {
-                $url = $xml->holding[0]->electronicAddress->text;
-                return $callback ? $callback(null, $url) : $url;
+                foreach($xml->holding as $holding) {
+                    $results[] = array(
+                        "Institution Name" => (string) $holding->{'physicalLocation'},
+                        "Symbol" => (string) $holding->{'institutionIdentifier'}->{'value'},
+                        "URL" => (string) $holding->{'electronicAddress'}->{'text'}
+                    );
+
+                }
+
+                return $results;
 
             } elseif ($xml->diagnostic) {
-                return $callback ? $callback($xml->diagnostic[0]->message, null) : false;
-
+                $this->message = (string) $xml->diagnostic->message;
+                return false;
+                
             } else {
-                return $callback ? $callback("Uh-oh! Something went wrong!", null) : false;
+                $this->message = "Unexpected Response";
+                return false;
             }
 
         } catch (Exception $e) {
-            return $callback ? $callback($e->getMessage(), null) : false;
+            $this->message = $e->getMessage();
+            return false;
         }
+    }
+
+    public function getMessage() {
+        return $this->message;
+    }
+
+    private function buildURL($isbn) {
+        $libSymbolString = implode(",", $this->libSymbols);
+        $isbn = str_replace("-", "", $isbn);
+
+        return "http://www.worldcat.org/webservices/catalog/content/libraries/isbn/{$isbn}?"
+             . "oclcsymbol={$libSymbolString}&wskey={$this->wskey}";
     }
 
     private function pullXml($url) {
