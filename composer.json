@@ -1,0 +1,9 @@
+{
+    "name": "malantonio/libcheck",
+    "version": "1.0.0",
+    "autoload": {
+        "files": [
+            "libcheck.php"
+        ]
+    }
+}
